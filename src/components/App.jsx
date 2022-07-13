@@ -3,6 +3,7 @@ import Searchbar from "./Searchbar";
 import imagesApi from './Services/imagesApi';
 import ImageGallery from "./ImageGallery";
 import Loader from './Loader/Loader';
+import css from './App.module.css';
 
 
 class App extends Component {
@@ -48,7 +49,7 @@ class App extends Component {
 render() {
   const {images, isLoader} = this.state;
     return (
-    <div>
+    <div className={css.app}>
       <Searchbar propsQuery={this.handleFormSubmit} />
       <ImageGallery
         images={images}

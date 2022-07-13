@@ -5,9 +5,10 @@ const Loader = () => {
   return (
     <section className={css.loader}>
       <BallTriangle
-        color="#00BFFF"
+        color="#3f51b5"
         height={300}
         width={300}
+        ariaLabel="loading"
       />
     </section>
   )
