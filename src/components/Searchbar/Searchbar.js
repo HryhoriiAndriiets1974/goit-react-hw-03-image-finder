@@ -8,7 +8,11 @@ class Searchbar extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    this.props.propsQuery(this.state.query);
+    const {query} = this.state;
+    if (query.trim() === '') {
+      return alert('Input images and photos')
+    }
+    this.props.propsQuery(query);
     this.setState({query: ''})
   }
 
