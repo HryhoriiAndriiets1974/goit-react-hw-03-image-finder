@@ -3,6 +3,7 @@ import Searchbar from "./Searchbar";
 import imagesApi from './Services/imagesApi';
 import ImageGallery from "./ImageGallery";
 import Loader from './Loader/Loader';
+import BtnLoadMore from "./Button/Button";
 import css from './App.module.css';
 
 
@@ -46,6 +47,13 @@ class App extends Component {
     }
   };
 
+  onBtnClick() {
+    this.setState(prevState => ({
+      currentPage: prevState.currentPage + 1,
+    }))
+    this.searchImages();
+  };
+
 render() {
   const {images, isLoader} = this.state;
     return (
@@ -55,6 +63,7 @@ render() {
         images={images}
       />
       {isLoader && <Loader/>}
+      <BtnLoadMore onClick={() => this.onBtnClick()} />
     </div>
   );
 }
