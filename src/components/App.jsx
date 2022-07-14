@@ -5,6 +5,8 @@ import ImageGallery from "./ImageGallery";
 import Loader from './Loader/Loader';
 import BtnLoadMore from "./Button/Button";
 import css from './App.module.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 class App extends Component {
@@ -14,6 +16,7 @@ class App extends Component {
     currentPage: 1,
     isLoader: false,
     error: null,
+    status: 'idle',
   };
 
   handleFormSubmit = imageQuery => {
@@ -25,25 +28,51 @@ class App extends Component {
   };
 
   searchImages = () => {
+    this.setState({
+      status: 'pending',
+      images: [],
+    });
     const {imageQuery, currentPage} = this.state;
-    this.setState({isLoader: true});
-
     imagesApi
       .fetch(imageQuery, currentPage)
       .then(images =>{
-        this.setState(prevState => ({
-          images: [...prevState.images, ...images],
-          currentPage: prevState.currentPage + 1,
-        }))
+        if (images.length === 0) {
+          toast.error('Sorry, there are no more images matching your search query!!!');
+          this.setState({status: 'idle'})
+        } else
+            this.setState(prevState => ({
+              images: [...prevState.images, ...images],
+              status: 'resolved',
+            }));
       })
-      .catch(error => this.setState(error))
-      .finally(() => this.setState({isLoader: false}))
-
+      .catch(error => this.setState({error, status: 'rejected'}));
   };
 
+  loadMoreImages = () => {
+    this.setState({status: 'pending'});
+    const {imageQuery, currentPage} = this.state;
+    imagesApi
+      .fetch(imageQuery, currentPage)
+      .then(images =>{
+        if (images.length === 0) {
+          toast.error('Sorry, there are no more images matching your search query!!!');
+          this.setState({status: 'idle'})
+        } else
+            this.setState(prevState => ({
+              images: [...prevState.images, ...images],
+              status: 'resolved',
+            }));
+      })
+      .catch(error => this.setState({error, status: 'rejected'}));
+  }
+
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.imageQuery !== this.state.imageQuery) {
+    const {imageQuery, currentPage} = this.state;
+    if (prevState.imageQuery !== imageQuery) {
       this.searchImages();
+    }
+    if (prevState.currentPage < currentPage) {
+      this.loadMoreImages(currentPage);
     }
   };
 
@@ -51,19 +80,28 @@ class App extends Component {
     this.setState(prevState => ({
       currentPage: prevState.currentPage + 1,
     }))
-    this.searchImages();
   };
 
 render() {
-  const {images, isLoader} = this.state;
+  const {images, status, error} = this.state;
     return (
     <div className={css.app}>
       <Searchbar propsQuery={this.handleFormSubmit} />
-      <ImageGallery
+      <ToastContainer autoClose={5000} />
+      {status === 'rejected' && (
+        <div role="alert">
+          <p>
+            {error.message}
+          </p>
+        </div>
+      )}
+      {images.length !== 0 &&
+        <ImageGallery
         images={images}
-      />
-      {isLoader && <Loader/>}
-      <BtnLoadMore onClick={() => this.onBtnClick()} />
+      />}
+      {status ==='pending' && <Loader/>}
+      {status === 'resolved' && (
+        <BtnLoadMore onClick={() => this.onBtnClick()} />)}
     </div>
   );
 }

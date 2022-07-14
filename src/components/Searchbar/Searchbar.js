@@ -1,5 +1,7 @@
 import { Component } from "react";
 import css from './Searchbar.module.css';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class Searchbar extends Component {
   state = {
@@ -10,7 +12,7 @@ class Searchbar extends Component {
     e.preventDefault();
     const {query} = this.state;
     if (query.trim() === '') {
-      return alert('Input images and photos')
+      return toast.error('Input images and photos')
     }
     this.props.propsQuery(query);
     this.setState({query: ''})
