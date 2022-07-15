@@ -1,6 +1,6 @@
 import { Component } from "react";
 import Searchbar from "./Searchbar";
-import imagesApi from './Services/imagesApi';
+import imagesApi from '../Services/imagesApi';
 import ImageGallery from "./ImageGallery";
 import Loader from './Loader/Loader';
 import BtnLoadMore from "./Button/Button";
@@ -22,11 +22,21 @@ class App extends Component {
     largeImageURL: '',
   };
 
+  componentDidUpdate(prevProps, prevState) {
+    const {imageQuery, currentPage} = this.state;
+    if (prevState.imageQuery !== imageQuery) {
+      this.searchImages();
+    }
+    if (prevState.currentPage < currentPage) {
+      this.loadMoreImages(currentPage);
+    }
+  };
+
   handleFormSubmit = imageQuery => {
     this.setState({
       imageQuery: imageQuery,
       images: [],
-      page: 1,
+      currentPage: 1,
     })
   };
 
@@ -35,20 +45,7 @@ class App extends Component {
       status: 'pending',
       images: [],
     });
-    const {imageQuery, currentPage} = this.state;
-    imagesApi
-      .fetch(imageQuery, currentPage)
-      .then(images =>{
-        if (images.length === 0) {
-          toast.error('Sorry, there are no more images matching your search query!!!');
-          this.setState({status: 'idle'})
-        } else
-            this.setState(prevState => ({
-              images: [...prevState.images, ...images],
-              status: 'resolved',
-            }));
-      })
-      .catch(error => this.setState({error, status: 'rejected'}));
+    this.loadMoreImages();
   };
 
   loadMoreImages = () => {
@@ -68,16 +65,6 @@ class App extends Component {
       })
       .catch(error => this.setState({error, status: 'rejected'}));
   }
-
-  componentDidUpdate(prevProps, prevState) {
-    const {imageQuery, currentPage} = this.state;
-    if (prevState.imageQuery !== imageQuery) {
-      this.searchImages();
-    }
-    if (prevState.currentPage < currentPage) {
-      this.loadMoreImages(currentPage);
-    }
-  };
 
   onBtnClick() {
     this.setState(prevState => ({
