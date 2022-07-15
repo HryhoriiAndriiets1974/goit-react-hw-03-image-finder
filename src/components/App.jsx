@@ -4,6 +4,7 @@ import imagesApi from './Services/imagesApi';
 import ImageGallery from "./ImageGallery";
 import Loader from './Loader/Loader';
 import BtnLoadMore from "./Button/Button";
+import Modal from "./Modal";
 import css from './App.module.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,6 +18,8 @@ class App extends Component {
     isLoader: false,
     error: null,
     status: 'idle',
+    showModal: false,
+    largeImageURL: '',
   };
 
   handleFormSubmit = imageQuery => {
@@ -82,8 +85,21 @@ class App extends Component {
     }))
   };
 
+  getlargeImageURL = imageUrl => {
+    this.setState({
+      largeImageURL: imageUrl,
+    })
+    this.toogleModal();
+  };
+
+  toogleModal = () => {
+    this.setState(state => ({
+      showModal: !state.showModal,
+    }))
+  };
+
 render() {
-  const {images, status, error} = this.state;
+  const {images, status, error, showModal, largeImageURL} = this.state;
     return (
     <div className={css.app}>
       <Searchbar propsQuery={this.handleFormSubmit} />
@@ -98,10 +114,18 @@ render() {
       {images.length !== 0 &&
         <ImageGallery
         images={images}
+        imagesClick={this.getlargeImageURL}
       />}
       {status ==='pending' && <Loader/>}
       {status === 'resolved' && (
-        <BtnLoadMore onClick={() => this.onBtnClick()} />)}
+        <BtnLoadMore onClick={() => this.onBtnClick()}
+      />)}
+      {showModal && (
+        <Modal
+          src={largeImageURL}
+          onClick={this.toogleModal}
+        />
+      )}
     </div>
   );
 }
